@@ -215,6 +215,8 @@ class BuildCMakeExtension(build_ext.build_ext):
     mujoco_mpc_root = Path(__file__).parent.parent
     mujoco_mpc_build_dir = mujoco_mpc_root / "build"
     cmake_configure_args = [
+        "-DCMAKE_C_COMPILER:STRING=clang-12",
+        "-DCMAKE_CXX_COMPILER:STRING=clang++-12",
         "-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE",
         f"-DCMAKE_BUILD_TYPE:STRING={build_cfg}",
         "-DBUILD_TESTING:BOOL=OFF",

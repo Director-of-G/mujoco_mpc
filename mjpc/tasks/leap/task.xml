@@ -7,6 +7,18 @@
 
   <custom>
     <!-- agent -->
+    <!-- 
+      agent_planner: type of planner (see kPlannerNames in include.cc)
+      agent_horizon: length of planning horizon
+      agent_timestep: length of time step
+      agent_policy_width: ???
+      
+      sampling_exploration: std of sampling noise
+      sampling_trajectories: number of trajectories to rollout
+      sampling_representation: type of interpolation (zero / linear / cubic)
+     
+      robust_xfrc: std of force when rollout with force perturbation (domain randomization)
+     -->
     <numeric name="agent_planner" data="5" />
     <numeric name="agent_horizon" data="1.0" />
     <numeric name="agent_timestep" data="0.01" />
