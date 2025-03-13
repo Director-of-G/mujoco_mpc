@@ -28,7 +28,7 @@
 #include "mjpc/tasks/tasks.h"
 #include "mjpc/utilities.h"
 
-ABSL_FLAG(std::string, task, "Leap",
+ABSL_FLAG(std::string, task, "Allegro Rotate (Sphere)",
           "Which model to load on startup.");
 
 // machinery for replacing command line error by a macOS dialog box

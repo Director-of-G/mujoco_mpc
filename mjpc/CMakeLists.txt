@@ -84,6 +84,8 @@ add_library(
   tasks/swimmer/swimmer.h
   tasks/walker/walker.cc
   tasks/walker/walker.h
+  tasks/allegro/rotate/rotate.h
+  tasks/allegro/rotate/rotate.cc
   planners/planner.cc
   planners/planner.h
   planners/policy.h

@@ -41,6 +41,8 @@
 #include "mjpc/tasks/shadow_reorient/hand.h"
 #include "mjpc/tasks/swimmer/swimmer.h"
 #include "mjpc/tasks/walker/walker.h"
+// MY OWN TASK FOR COMPARISON
+#include "mjpc/tasks/allegro/rotate/rotate.h"
 
 namespace mjpc
 {
@@ -72,6 +74,7 @@ std::vector<std::shared_ptr<Task>> GetTasks() {
       std::make_shared<QuadrupedHill>(),
       std::make_shared<Swimmer>(),
       std::make_shared<Walker>(),
+      std::make_shared<allegro::Rotate>(),
   };
 }
 }  // namespace mjpc
