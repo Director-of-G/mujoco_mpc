@@ -78,30 +78,13 @@ void Rotate::TransitionLocked(mjModel *model, mjData *data) {
     if (duration > timeout_) {
       time_reset = std::chrono::steady_clock::now();
     }
-
-    int sphere_body = mj_name2id(model, mjOBJ_BODY, "sphere");
-    if (sphere_body != -1) {
-      reset_task = true;
-      // reset sphere
-      int jnt_qposadr = model->jnt_qposadr[model->body_jntadr[sphere_body]];
-      int jnt_veladr = model->jnt_dofadr[model->body_jntadr[sphere_body]];
-      mju_copy(data->qpos + jnt_qposadr, model->key_qpos + jnt_qposadr, 4);
-      mju_zero(data->qvel + jnt_veladr, 3);
-
-      // reset hand
-      // TODO: check the dims of data->qpos and data->qvel
-      int hand_qposadr = 4;
-      int hand_qveladr = 3;
-      mju_copy(data->qpos + hand_qposadr, model->key_qpos + hand_qposadr, 16);
-      mju_zero(data->qvel + hand_qveladr, 16);
-
-      // reset counter
-      if (rotation_counter > num_best_rots) {
-        num_best_rots = rotation_counter;
-      }
-      prev_best_rots = rotation_counter;
-      rotation_counter = 0;
+    reset_task = true;
+    // reset counter
+    if (rotation_counter > num_best_rots) {
+      num_best_rots = rotation_counter;
     }
+    prev_best_rots = rotation_counter;
+    rotation_counter = 0;
   }
 
   // If the orientation of the cube is close to the goal, change the goal
@@ -220,6 +203,25 @@ void Rotate::TransitionLocked(mjModel *model, mjData *data) {
     mju_copy(data->mocap_quat, q_goal.data(), 4);
   }
 
+  // reset cube and hand qpos
+  if (reset_task || new_goal) {
+    int sphere_body = mj_name2id(model, mjOBJ_BODY, "sphere");
+    if (sphere_body != -1) {
+      // reset sphere
+      int jnt_qposadr = model->jnt_qposadr[model->body_jntadr[sphere_body]];
+      int jnt_veladr = model->jnt_dofadr[model->body_jntadr[sphere_body]];
+      mju_copy(data->qpos + jnt_qposadr, model->key_qpos + jnt_qposadr, 4);
+      mju_zero(data->qvel + jnt_veladr, 3);
+
+      // reset hand
+      int hand_qposadr = 4;
+      int hand_qveladr = 3;
+      mju_copy(data->qpos + hand_qposadr, model->key_qpos + hand_qposadr, 16);
+      mju_zero(data->qvel + hand_qveladr, 16);
+    }
+  }
+
+  // forward mujoco simulation
   if (reset_task || new_goal) {
     // Step the simulation forward
     mutex_.unlock();
