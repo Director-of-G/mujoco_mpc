@@ -35,6 +35,10 @@
     <numeric name="n_elite" data="3" />
     <numeric name="std_min" data="0.4" />
 
+    <!-- delta control -->
+    <numeric name="use_delta_action" data="1" />
+    <numeric name="delta_action" data="0.1" />
+
     <!-- parameters start from here -->
 
     <!-- state noise -->
@@ -79,7 +83,9 @@
     <!-- Residuals -->
     <user name="Sphere Orientation" dim="3" user="0 1.0 0 10"/>
     <user name="Sphere Angular Velocity" dim="3" user="0 0.0 0 1" />
-    <user name="Grasp" dim="16" user="0 0.0 0 10" />
+    <user name="Grasp" dim="16" user="0 0.01 0 0.1" />
+    <!-- <user name="Grasp" dim="16" user="2 0.01 0 0.1 0.1" /> -->
+    <!-- <user name="Grasp" dim="16" user="6 0.01 0 0.1 0.01" /> -->
     <user name="Actuation" dim="16" user="0 0.0 0 10" />
 
     <!-- Measurements we want to use -->

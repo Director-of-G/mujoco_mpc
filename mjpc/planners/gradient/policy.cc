@@ -80,6 +80,10 @@ void GradientPolicy::Reset(int horizon, const double* initial_repeated_action) {
 // compute action from policy
 void GradientPolicy::Action(double* action, const double* state,
                             double time) const {
+  // previous action (absolute)
+  std::vector<double> prev_abs_action(model->nu);
+  mju_copy(prev_abs_action.data(), action, model->nu);
+
   // find times bounds
   int bounds[2];
   FindInterval(bounds, times, time, num_spline_points);
@@ -98,7 +102,29 @@ void GradientPolicy::Action(double* action, const double* state,
                        num_spline_points);
   }
 
-  // Clamp controls
+  /*
+    Absolute action version
+  */
+  // // Clamp controls
+  // Clamp(action, model->actuator_ctrlrange, model->nu);
+
+  /*
+    Delta action version
+  */
+  // Get delta action
+  bool use_delta_action = GetNumberOrDefault(false, model, "use_delta_action");
+  double delta_action = abs(GetNumberOrDefault(1.0, model, "delta_action"));
+
+  // Delta action
+  std::vector<double> action_bounds(2*model->nu);
+  mju_copy(action_bounds.data(), model->actuator_ctrlrange, 2*model->nu);
+  if (use_delta_action) {
+    for (int i = 0; i < model->nu; ++i) {
+      action_bounds[2*i] = prev_abs_action[i] - delta_action;
+      action_bounds[2*i+1] = prev_abs_action[i] + delta_action;
+    }
+  }
+  Clamp(action, action_bounds.data(), model->nu);
   Clamp(action, model->actuator_ctrlrange, model->nu);
 }
 

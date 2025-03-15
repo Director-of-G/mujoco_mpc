@@ -639,11 +639,18 @@ void iLQGPlanner::ActionRollouts(int horizon, ThreadPool& pool) {
         int dim_state_derivative = 2 * model->nv + model->na;
         int dim_action = model->nu;
 
+        // std::vector<double> action_improvement(dim_action);
+
         // set improved action
         mju_copy(
             action,
             DataAt(candidate_policy[i].trajectory.actions, index * dim_action),
             dim_action);
+
+        // mju_copy(
+        //     action_improvement.data(),
+        //     DataAt(candidate_policy[i].trajectory.actions, index * dim_action),
+        //     dim_action);
 
         // ----- feedback ----- //
 
@@ -663,6 +670,23 @@ void iLQGPlanner::ActionRollouts(int horizon, ThreadPool& pool) {
         // add feedback
         mju_addTo(action, candidate_policy[i].action_scratch.data(),
                   dim_action);
+
+        // mju_addTo(action_improvement.data(), candidate_policy[i].action_scratch.data(),
+        //           dim_action);
+        // // Get delta action
+        // bool use_delta_action = GetNumberOrDefault(false, model, "use_delta_action");
+        // double delta_action = abs(GetNumberOrDefault(1.0, model, "delta_action"));
+        // if (use_delta_action) {
+        //   std::vector<double> action_improvement_bounds(2*dim_action);
+        //   for (int i = 0; i < dim_action; i++) {
+        //     action_improvement_bounds[2*i] = -delta_action;
+        //     action_improvement_bounds[2*i+1] = delta_action;
+        //   }
+        //   Clamp(action_improvement.data(), action_improvement_bounds.data(), dim_action);
+        // }
+        // mju_addTo(action, action_improvement.data(), dim_action);
+        // std::cout << "action_improvement: " << action_improvement[0] << " "
+        //           << action_improvement[1] << std::endl;
 
         // clamp controls
         Clamp(action, model->actuator_ctrlrange, dim_action);
