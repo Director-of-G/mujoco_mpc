@@ -36,11 +36,11 @@
     <numeric name="std_min" data="0.4" />
 
     <!-- delta control -->
-    <numeric name="use_delta_action" data="1" />
+    <numeric name="use_delta_action" data="0" />
     <numeric name="delta_action" data="0.1" />
 
     <!-- use given goal -->
-    <numeric name="use_given_goal" data="0" />
+    <numeric name="use_given_goal" data="1" />
 
     <!-- parameters start from here -->
 
