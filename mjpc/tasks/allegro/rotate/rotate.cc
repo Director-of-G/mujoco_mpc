@@ -65,6 +65,15 @@ void Rotate::ResidualFn::Residual(const mjModel *model, const mjData *data,
 }
 
 void Rotate::TransitionLocked(mjModel *model, mjData *data) {
+  bool use_given_goal = GetNumberOrDefault(false, model, "use_given_goal");
+  if (use_given_goal) {
+    TransitionGivenGoalLocked(model, data);
+  } else {
+    TransitionRandomGoalLocked(model, data);
+  }
+}
+
+void Rotate::TransitionRandomGoalLocked(mjModel *model, mjData *data) {
   bool new_goal = false;
   bool reset_task = false;
 
@@ -242,6 +251,66 @@ void Rotate::TransitionLocked(mjModel *model, mjData *data) {
   parameters[4] = prev_best_rots;
   parameters[5] = total_rots;
   parameters[6] = time_per_rot;
+  parameters[7] = angle / M_PI * 180.0;
+}
+
+void Rotate::TransitionGivenGoalLocked(mjModel *model, mjData *data) {
+  // get the current goal
+  double current_quat_goal[4];
+  mju_copy(current_quat_goal, data->mocap_quat, 4);
+  mju_normalize4(current_quat_goal);
+
+  double *sphere_orientation = SensorByName(model, data, "sphere_orientation");
+
+  // compute the distance to goal
+  std::vector<double> q_error = {0.0, 0.0, 0.0, 0.0};
+  std::vector<double> q_gco_conj = {0.0, 0.0, 0.0, 0.0};
+  mju_negQuat(q_gco_conj.data(), current_quat_goal);
+  mju_mulQuat(q_error.data(), sphere_orientation, q_gco_conj.data());
+  mju_normalize4(q_error.data());
+  if (q_error[0] < 0.0) {
+    q_error[0] *= -1.0;
+  }
+  double angle = 2.0 * std::acos(q_error[0]);
+
+  // tell if goal changed
+  std::vector<double> q_diff = {0.0, 0.0, 0.0, 0.0};
+  mju_sub(q_diff.data(), current_quat_goal, last_quat_goal_.data(), 4);
+  double is_goal_changed = mju_norm(q_diff.data(), 4) >= 1e-6;
+
+  if (is_goal_changed) {
+    rotation_counter += 1;
+    int sphere_body = mj_name2id(model, mjOBJ_BODY, "sphere");
+    if (sphere_body != -1) {
+      // reset sphere
+      int jnt_qposadr = model->jnt_qposadr[model->body_jntadr[sphere_body]];
+      int jnt_veladr = model->jnt_dofadr[model->body_jntadr[sphere_body]];
+      mju_copy(data->qpos + jnt_qposadr, model->key_qpos + jnt_qposadr, 4);
+      mju_zero(data->qvel + jnt_veladr, 3);
+
+      // reset hand
+      int hand_qposadr = 4;
+      int hand_qveladr = 3;
+      mju_copy(data->qpos + hand_qposadr, model->key_qpos + hand_qposadr, 16);
+      mju_zero(data->qvel + hand_qveladr, 16);
+    }
+    mju_copy(last_quat_goal_.data(), current_quat_goal, 4);
+  }
+
+  // forward mujoco simulation
+  if (is_goal_changed) {
+    // Step the simulation forward
+    mutex_.unlock();
+    mj_forward(model, data);
+    mutex_.lock();
+  }
+
+  // update the rotation counter in the GUI
+  parameters[2] = rotation_counter;
+  parameters[3] = 0;
+  parameters[4] = 0;
+  parameters[5] = 0;
+  parameters[6] = 0;
   parameters[7] = angle / M_PI * 180.0;
 }
 

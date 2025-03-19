@@ -42,6 +42,8 @@ class Rotate : public Task {
 
   // Reset the sphere if the sub-goal is reached
   void TransitionLocked(mjModel *model, mjData *data) override;
+  void TransitionRandomGoalLocked(mjModel *model, mjData *data);
+  void TransitionGivenGoalLocked(mjModel *model, mjData *data);
   void ModifyState(const mjModel *model, State *state) override;
   
  protected:
@@ -56,6 +58,7 @@ class Rotate : public Task {
   // noisy state estimate states
   // std::vector<double> pos_cube_ = std::vector<double>(3);
   std::vector<double> quat_sphere_ = std::vector<double>(4);
+  std::vector<double> last_quat_goal_ = std::vector<double>(4);
 
   // variables for randomizing the goal cube orientation
   int rand1_ = 0;
