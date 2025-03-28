@@ -295,6 +295,8 @@ void Rotate::TransitionGivenGoalLocked(mjModel *model, mjData *data) {
       mju_zero(data->qvel + hand_qveladr, 16);
     }
     mju_copy(last_quat_goal_.data(), current_quat_goal, 4);
+    time_reset = std::chrono::steady_clock::now();
+    time_start = std::chrono::steady_clock::now();
   }
 
   // forward mujoco simulation
