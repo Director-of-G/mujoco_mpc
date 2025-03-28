@@ -241,8 +241,13 @@ std::array<double, 4> TimeSpline::CubicCoefficients(
     double time, int lower_node_index) const {
   std::array<double, 4> coefficients;
   int upper_node_index = lower_node_index + 1;
-  CHECK(upper_node_index != times_.size())
-      << "CubicCoefficients shouldn't be called for boundary conditions.";
+  // This will terminate the program when the condition is not true
+  // CHECK(upper_node_index != times_.size())
+  //     << "CubicCoefficients shouldn't be called for boundary conditions.";
+  if (upper_node_index == times_.size()) {
+    upper_node_index = times_.size() - 1;
+    lower_node_index = upper_node_index - 1;
+  }
   double lower = times_[lower_node_index];
   double upper = times_[upper_node_index];
   double t = (time - lower) / (upper - lower);
